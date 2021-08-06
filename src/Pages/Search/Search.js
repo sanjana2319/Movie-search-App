@@ -1,84 +1,115 @@
-import React, { useEffect } from 'react';
-import axios from "axios";
-import { createTheme, ThemeProvider } from '@material-ui/core/styles';
-import { useState } from "react";
-import { Button, TextField } from "@material-ui/core";
-import SearchIcon from '@material-ui/icons/Search';
-import CostomPagination from '../../component/Pagination/Pagination';
-import Transition from '../../component/Transition/Transition';
-import "./Search.css";
+import React, { useEffect } from 'react'
+import axios from 'axios'
+import { createTheme, ThemeProvider } from '@material-ui/core/styles'
+import { useState } from 'react'
+import { Button, TextField } from '@material-ui/core'
+import SearchIcon from '@material-ui/icons/Search'
+import CostomPagination from '../../component/Pagination/Pagination'
+import Transition from '../../component/Transition/Transition'
+import './Search.css'
 
 const Search = () => {
-     
-    const [page, setPage] = useState(0);
-    const [searchText, setSearchText] = useState("");
-    const [content, setContent] = useState();
-    const [type, setType] = useState(1);
-    const [numOfPages, setNumOfPages] = useState();
+	const [page, setPage] = useState(0)
+	const [searchText, setSearchText] = useState('')
+	const [title, setTitle] = useState('')
+	const [content, setContent] = useState()
+	const [apiData, setApiData] = useState({})
+	const [falseResponse, setFalseResponse] = useState(false)
+	const [showModal, setShowModal] = useState(false)
+	const [type, setType] = useState(1)
+	const [numOfPages, setNumOfPages] = useState()
+	const [open, setOpen] = useState(false)
 
-    const darkTheme = createTheme({
-        palette: {
-            type: "dark",
-            primary: {
-                main: "#fff",
-            },
-        },
-    });
-    const fetchSearch = async() => {
-        try {
-            const {data} = await axios.get(
-                // `http://www.omdbapi.com/?i=tt3896198&apikey=${process.env.REACT_APP_API_KEY}
-                // &language=en-US&query=${searchText}&page=${page}`
-                `https://www.omdbapi.com/?apikey=${process.env.REACT_APP_API_KEY}&t=${searchText}`
-            ); 
+	const handleOpen = () => {
+		setOpen(true)
+	}
 
-            setSearchText(data.Title);
-            setContent(data.Poster);
-            setType(data.Type);
-            // console.log(data.Type)
-            // console.log(data.Poster);
-            console.log(data);
-            // // {Response === false && (type ? <h2>No Movies found</h2>: <h2>No Series Found</h2>)}
-            // console.log(Response)
-        } catch (error){
-            console.log(error);
-        }
-    }
-    useEffect(() => {
-        window.scroll(0,0);
-        fetchSearch();
-    },[page]);
-    return (
-        <div>
-        <ThemeProvider theme = {darkTheme}>
-            <div style = {{display: "flex", margin: "10px 0"}}>
-            <TextField
-            style = {{flex:1}}
-            className = "searchbox"
-            label = "Search"
-            varient = "filled"
-            onChange= {(e) => setSearchText(e.target.value)}
+	const handleClose = () => {
+		setOpen(false)
+	}
 
-        />
-        <Button variant = "contained" style= {{marginLeft: 10}}
-        onClick= {fetchSearch}><SearchIcon/></Button>
-        </div>
-        </ThemeProvider>
-        <Button ><div onClick = {<Transition />} className = "media">
-        {/* <Transition type = {type}/> */}
-        <img  src = {content} />
-        <p className = "title">{searchText}</p>
-        <p className = "subTitle">{type}</p>
+	const handleClick = () => {
+		setOpen(true)
+	}
 
-        </div>
-        
-        <Transition>Title: </Transition> 
-        </Button>
-        <CostomPagination/>
-        </div>
-        
-        
-    );
-};
+	const darkTheme = createTheme({
+		palette: {
+			type: 'dark',
+			primary: {
+				main: '#fff',
+			},
+		},
+	})
+	const fetchSearch = async () => {
+		try {
+			setFalseResponse(false)
+			setTitle('')
+			setContent('')
+			setType('')
+			setApiData('')
+			const { data } = await axios.get(
+				`https://www.omdbapi.com/?apikey=${process.env.REACT_APP_API_KEY}&t=${searchText}`,
+			)
 
-export default Search;
+			if (data.Response === 'False') {
+				if (searchText.length !== 0) setFalseResponse(true)
+			} else {
+				setTitle(data.Title)
+				setContent(data.Poster)
+				setType(data.Type)
+				setApiData(data)
+			}
+			console.log(data)
+		} catch (error) {
+			console.log(error)
+		}
+	}
+	useEffect(() => {
+		fetchSearch()
+	}, [searchText])
+
+	return (
+		<div>
+			<ThemeProvider theme={darkTheme}>
+				<div style={{ display: 'flex', margin: '10px 0' }}>
+					<TextField
+						style={{ flex: 1 }}
+						className="searchbox"
+						label="Search"
+						varient="filled"
+						onChange={(e) => setSearchText(e.target.value)}
+					/>
+					<Button
+						variant="contained"
+						style={{ marginLeft: 10 }}
+						onClick={fetchSearch}>
+						<SearchIcon />
+					</Button>
+				</div>
+			</ThemeProvider>
+
+			{falseResponse ? <h2>No Movies | Series Found!</h2> : null}
+			{title ? (
+				<div>
+					<div onClick={handleClick} className="media">
+						{content !== "N/A" ? <img src={content} alt="Poster"/> : <span className = "PNotFound">Poster not found</span>}
+						<p className="title">{title}</p>
+						<p className="subTitle">{type}</p>
+					</div>
+				</div>
+			) : null}
+			<div onClick={handleClick}>
+				<Transition
+					open={open}
+					handleClose={handleClose}
+					title={title}
+					data={apiData}
+				/>
+			</div>
+
+			<CostomPagination />
+		</div>
+	)
+}
+
+export default Search
