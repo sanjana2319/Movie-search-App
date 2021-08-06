@@ -16,7 +16,7 @@ function App() {
     <Container>
     <Switch>
       <Route path = "/" component = {Search}/>
-      <Route path = "NotFound" component = {NotFound}/>
+      <Route path = "/*" component = {NotFound}/>
     </Switch>
     </Container>  
     </div>
