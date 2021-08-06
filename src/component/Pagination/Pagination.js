@@ -1,5 +1,4 @@
 import Pagination from "@material-ui/lab/Pagination";
-import NotFound from "../../Pages/NotFound/NotFound";
 const CostomPagination = ({setPage, numOfPages = 10}) => {
 
     const pageChange = (e) => {
@@ -15,9 +14,12 @@ const CostomPagination = ({setPage, numOfPages = 10}) => {
             marginTop: 10,
             
         }}>
-        <Pagination color = "primary"
+            <div className = "pageFix">
+            <Pagination color = "primary"
         count= {numOfPages}
         />
+            </div>
+        
         </div>
     );
 };
